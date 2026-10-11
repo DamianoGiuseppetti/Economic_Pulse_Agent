@@ -6,27 +6,21 @@ Two rules shape it. The model never does the arithmetic or decides what counts a
 
 ## Example runs
 
-Three real runs from 2026-10-07 with `claude-haiku-4-5`, copied without edits. I checked every number against FRED with a script that shares no code with the project ([`docs/verify_examples.py`](docs/verify_examples.py)). I replaced one run of example 3 because its summary called August 2025 the peak of core inflation when January 2025 was higher. The figures in that run were right and the sentence was not, which is the kind of slip the [known limitations](#known-limitations) describe. Costs are with a warm prompt cache. All seven questions from my last full run are in [`economic_pulse_agent/examples.txt`](economic_pulse_agent/examples.txt).
+Real runs from 2026-10-07 with `claude-haiku-4-5`, copied without edits. I checked every number against FRED with [`docs/verify_examples.py`](docs/verify_examples.py). More are in [`economic_pulse_agent/examples.txt`](economic_pulse_agent/examples.txt).
 
-### 1. A simple question: freshness and the next release
+### 1
 
 > **You:** What is the current unemployment rate?
-
-`get_economic_series(UNRATE, 2026-08-01 to 2026-10-07)` · 2 iterations · 10,960 tokens in / 176 out · $0.0030
-
-> The current unemployment rate is **4.2%** as of September 2026 (published October 2, 2026). This represents an increase of 0.1 percentage points from August's 4.1%.
+>
+> **Agent:** The current unemployment rate is **4.2%** as of September 2026 (published October 2, 2026). This represents an increase of 0.1 percentage points from August's 4.1%.
 >
 > The next employment report will be released on November 6, 2026.
 
-The September and August values, the October 2 publication date and the November 6 next release all match FRED. The agent says which period the number describes and when it came out, because FRED dates name the period and not the release.
-
-### 2. An "is it unusual?" question: statistics the model does not decide
+### 2
 
 > **You:** Has anything unusual happened in CPI over the past year?
-
-`detect_anomalies(CPIAUCSL, 2025-10-07 to 2026-10-07)` · 2 iterations · 11,143 tokens in / 374 out · $0.0042
-
-> Over the past year, 2 of 10 CPI observations were unusual:
+>
+> **Agent:** Over the past year, 2 of 10 CPI observations were unusual:
 >
 > **June 2026**: CPI fell 0.42% month-over-month, a notably large decline (z = –3.49, 74.8th percentile). This was the biggest drop relative to what's typical for CPI month-to-month changes.
 >
@@ -36,15 +30,11 @@ The September and August values, the October 2 publication date and the November
 >
 > These moves suggest there was some volatility in price pressures in the first half of 2026, with a sharp acceleration in March followed by moderation by June, though neither move was truly extreme in absolute terms—they were just notably larger than CPI's typical month-to-month swings over the past decade.
 
-Python decides what is unusual. Each month's change is scored against the previous ten years of changes (median and MAD, flagged at |z| of 3 or more) and the tool returns "2 of 10". My own recomputation gives the same two flags with the same z-scores, percentiles, changes and release dates. The answer invents no cause. It does explain the 74.8th percentile next to a z of -3.49 poorly: a fall in a series that usually rises is far from its usual change but only mid-sized in absolute terms.
-
-### 3. A two-turn conversation: session memory
+### 3
 
 > **You:** What was the unemployment rate between January 2025 and August 2026?
-
-`get_economic_series(UNRATE, 2025-01-01 to 2026-08-31)` · 2 iterations · 11,301 tokens in / 310 out · $0.0040
-
-> The unemployment rate between January 2025 and August 2026 rose gradually from 4.0% to 4.1%, an increase of 0.1 percentage points. Here are the monthly values:
+>
+> **Agent:** The unemployment rate between January 2025 and August 2026 rose gradually from 4.0% to 4.1%, an increase of 0.1 percentage points. Here are the monthly values:
 >
 > **January 2025 – August 2026 Unemployment Rate:**
 > - Started at **4.0%** (January 2025)
@@ -56,22 +46,18 @@ Python decides what is unusual. Each month's change is scored against the previo
 > The data was released on September 4, 2026. The next unemployment release is scheduled for November 6, 2026.
 
 > **You:** And core CPI over the same period?
-
-`get_economic_series(CPILFESL, 2025-01-01 to 2026-08-31)` · 2 iterations · 12,854 tokens in / 319 out · $0.0056
-
-> Core CPI (excluding food and energy) rose from 324.64 in January 2025 to 337.77 in August 2026, up 4.04%. Year-over-year inflation declined significantly over the period, falling from 3.28% in January 2025 to 2.45% in August 2026.
+>
+> **Agent:** Core CPI (excluding food and energy) rose from 324.64 in January 2025 to 337.77 in August 2026, up 4.04%. Year-over-year inflation declined significantly over the period, falling from 3.28% in January 2025 to 2.45% in August 2026.
 >
 > **Key pattern:** Core inflation peaked at 3.28% in early 2025, then generally trended down through spring 2025, hitting a low of 2.77% in May. It rebounded mid-year (reaching 3.11% in August 2025) before resuming its decline through early 2026. The latest reading of 2.45% (August 2026) continues that downward momentum.
 >
 > The August 2026 data was released on September 11, 2026. The next CPI release is scheduled for October 14, 2026.
 
-The follow-up never said "2025 to 2026". A short "Recently discussed" line in the prompt gave the agent the first window, and it asked for exactly the same dates. The unemployment levels, the November 2025 peak, the index values, the 4.04% change, the year-over-year rates (3.28, 2.77, 3.11, 2.45) and all three release dates match FRED.
-
 ## The Streamlit app
 
 ![The Streamlit app answering the CPI question](docs/app.png)
 
-The app is a chat box over the same agent. This screenshot is a separate run of the question from example 2. Under each answer, a details panel shows the cost, the number of model calls, the time, the tokens, the tool calls with their arguments, whether the grounding check passed and whether the prompt cache was hit. When a call would be expensive, the app asks with Approve and Decline buttons before running it. It listens on localhost only.
+A chat box over the same agent. Under each answer, a details panel shows the cost, model calls, time, tokens, tool calls with their arguments, the grounding check result and whether the prompt cache was hit. When a call would be expensive, the app asks with Approve and Decline buttons before running it. It listens on localhost only.
 
 ## Architecture
 
@@ -106,25 +92,17 @@ LangChain's `AgentExecutor` runs the loop: the model picks a tool, the tool runs
 
 ## How it was built
 
-I built it in five stages: a data layer, an agent loop, a port to LangChain, the anomaly and narrative tools, and finally hardening plus the app. Claude Code did the implementation from written specs, and I reviewed each stage against a set of tests before moving on. The decisions that shaped the result:
+I built it in five stages: a data layer (SQLite cache over FRED and Yahoo Finance), an agent loop on the raw Anthropic SDK, a port to LangChain's `AgentExecutor`, the anomaly and narrative tools, and finally hardening plus the app. Claude Code did the implementation from written specs, and each stage had to pass its tests before the next began.
 
-I wrote the agent loop twice. The first version used the raw Anthropic SDK, so I could see every step of the tool-use protocol. The second moved to LangChain's `AgentExecutor`, which gave up one thing: the raw loop could force a final answer when the budget ran out, and `AgentExecutor` can only stop. When it stops, one extra tool-free call makes the model answer from what it already fetched.
-
-The data layer is a SQLite cache keyed on series and date range. A cache hit has to cover the whole requested range, not just exist, otherwise a different window would silently return nothing. Values are upserted because FRED revises history, and the TTL is 24 hours.
-
-Anything numeric is computed in Python. The anomaly tool scores changes rather than levels, because CPI and GDP trend upward and a z-score on a level would flag every recent month. It uses the median and MAD, with each observation compared only against the ten years before it, so there is no look-ahead, and it reports how many observations were flagged out of how many were scored, since scanning many points flags a few by chance. `generate_narrative` makes no model call, which means its text cannot add claims the data does not support.
-
-The grounding check is a word list of causes (earnings, tariffs, AI, rate-cut expectations and so on). If a sentence names one that no tool result mentions, the model is asked once to remove it or label it. It is deliberately simple, and it covers only the listed causes.
-
-The last stage added what a real deployment would need. Prompt caching covers the static prompt and tool definitions (about 5,200 tokens, above Haiku's 4,096-token minimum). Data fetches retry transient errors at most twice inside the tool's 10 second budget, and one circuit breaker per source opens after three failures. A turn's independent tool calls run concurrently. An approval gate asks before a large uncached download, a long chain of tool calls or a session that has cost over $0.15. The tools are read-only, so the gate protects cost and API rate limits, not safety. Last, a per-session entity memory keeps the series, tickers and date windows already discussed, so "and core CPI over the same period?" resolves. It stores names and windows, never numbers, so the model still fetches whatever it quotes.
+Three decisions matter most. Everything numeric is computed in Python: the anomaly tool scores changes rather than levels, uses the median and MAD, and compares each observation only against the ten years before it. Causes are policed by a simple word-list check on every answer. And the agent is hardened the way a deployed one would be: prompt caching, retries and per-source circuit breakers, concurrent tool calls, an approval gate for expensive calls, and per-session memory of the series and date windows already discussed.
 
 ## Run it yourself
 
 You need Python 3.10 or newer (I tested on 3.10), a free [FRED API key](https://fred.stlouisfed.org/docs/api/api_key.html) and an [Anthropic API key](https://console.anthropic.com/settings/keys). The Anthropic key is billed to you, so set a spending limit in the console first. No keys are in this repository.
 
 ```bash
-git clone https://github.com/DamianoGiuseppetti/economic-pulse-agent.git
-cd economic-pulse-agent
+git clone https://github.com/DamianoGiuseppetti/Economic_Pulse_Agent.git
+cd Economic_Pulse_Agent
 python3 -m venv .venv
 source .venv/bin/activate        # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
@@ -175,17 +153,8 @@ I have not totaled what the live-model tests cost, so keep your spending limit i
 
 ## Known limitations
 
-- On "was X unusual?" the model sometimes also calls `get_economic_series`, a redundant call. Tool routing is probabilistic: "What is going on with unemployment?" goes to `generate_narrative` alone in most repeats and to an extra series call in about one repeat in ten.
-- About 36% of FEDFUNDS monthly changes are exactly zero, so any real move scores a very high z (5 to 14). A caveat in the tool output says so, but the statistic is unchanged.
-- The z-score and the percentile can disagree in direction, as in example 2. The model often glosses over it.
-- On advice-style questions ("should I sell?") the model occasionally adds a general sentence about how markets work without the "(not verified by my data)" label. The grounding word list matches named causes, not mechanisms.
-- After you decline an expensive call, the model may answer from a coarser source (I saw weekly bars instead of daily) and label the interval without saying you declined.
-- The approval thresholds (1,300 observations, four tool calls, $0.15) come from a small sample of my own usage. Normal questions stay well under all three, so the gate rarely fires. The Approve and Decline buttons are tested with Streamlit's test harness, not by clicking through a browser.
+- On "was X unusual?" the model sometimes also calls `get_economic_series`, a redundant call. Tool routing is probabilistic, and a question like "What is going on with unemployment?" occasionally makes an extra call too.
+- The grounding check is a word list. It catches named causes (earnings, tariffs, rate-cut expectations) that no tool result supports, but not general statements about how markets work, which the model occasionally adds to advice-style questions.
+- About 36% of FEDFUNDS monthly changes are exactly zero, so any real move scores a very high z. For other series, the z-score and the percentile can disagree in direction, and the model doesn't always explain why.
+- The approval thresholds (1,300 observations, four tool calls, $0.15) come from a small sample of my own usage, and normal questions stay well under all three. After a decline, the model may answer from a coarser source and label it without saying you declined.
 - Circuit breaker and approval state live in the process and reset on restart. Memory covers one session and nothing carries over to the next.
-- FRED returns the latest revised values, so a past release may have looked different when it came out. The agent can only report what has been published.
-- `yfinance` reads Yahoo Finance without an official API and can break without notice.
-- Some live tests depend on the model's wording and can flake.
-
-## Not financial advice
-
-This is an educational project. It reports data and how unusual a move was. It does not recommend buying, selling or holding anything.
