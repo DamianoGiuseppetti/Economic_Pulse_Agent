@@ -1,0 +1,96 @@
+Economic Pulse Agent: example Q&A (generated 2026-10-07, model claude-haiku-4-5, one session so later answers can use earlier context)
+
+
+Q: What is the current unemployment rate?
+
+A: The current unemployment rate is **4.2%**, based on September 2026 data released on October 2, 2026.
+
+The next employment report will be published on November 6, 2026.
+
+Tool calls: get_economic_series({"series_id": "UNRATE", "start_date": "2026-09-01", "end_date": "2026-10-07"})
+[answered; 2 iterations; 10931 in / 157 out tokens; 2.4s]
+
+==============================================================================
+
+Q: What is inflation running at right now, based on CPI?
+
+A: Based on the latest CPI data, **inflation is running at 3.35% year-over-year** as of August 2026 (released September 11, 2026).
+
+Inflation ticked up slightly in August, rising 0.05 percentage points from 3.30% in July. Over the past year, inflation has been volatile—it dipped as low as 2.39% in January before spiking to 4.17% in May, then has moderated somewhat over the summer months.
+
+The next CPI report (for September 2026) is scheduled for October 14, 2026.
+
+Tool calls: get_economic_series({"series_id": "CPIAUCSL", "start_date": "2025-09-01", "end_date": "2026-10-07"})
+[answered; 2 iterations; 12027 in / 262 out tokens; 5.3s]
+
+==============================================================================
+
+Q: How has the S&P 500 performed so far in 2026?
+
+A: The S&P 500 is up **12.33% year-to-date through October 1, 2026**, rising from 6,939 to 7,795.
+
+The year started with a modest decline into March, when the index fell 5.92% to a low of 6,529, but it has recovered sharply since then. From March through October, the S&P 500 rose 19.40%, driving most of the year's gains and bringing the index to its highest level in early October (7,845).
+
+Tool calls: get_stock_data({"ticker": "^GSPC", "start_date": "2026-01-01", "end_date": "2026-10-07", "interval": "1mo"})
+[answered; 2 iterations; 11804 in / 248 out tokens; 4.5s]
+
+==============================================================================
+
+Q: How did the 10-year Treasury yield change between Q1 2025 and Q1 2026?
+
+A: The 10-year Treasury yield **fell by 0.26 percentage points (5.74%) between Q1 2025 and Q1 2026**, declining from an average of 4.45% to 4.20%.
+
+This decline suggests that bond investors became less concerned about longer-term inflation or growth risks over the year, or that the Federal Reserve's monetary policy path shifted toward a more accommodative stance compared to Q1 2025.
+
+Tool calls: compare_periods({"series_id": "DGS10", "p1_start": "2025-01-01", "p1_end": "2025-03-31", "p2_start": "2026-01-01", "p2_end": "2026-03-31", "agg_method": "mean"})
+[answered; 2 iterations; 11814 in / 280 out tokens; 4.4s]
+
+==============================================================================
+
+Q: How has the S&P 500 reacted to unemployment changes since 2024?
+
+A: The S&P 500 and unemployment have moved in opposite directions since early 2024, but the relationship is complex rather than a tight one-to-one reaction.
+
+**The divergence:**
+- Unemployment rose from 3.7% in January 2024 to a peak of 4.5% in November 2025, a deterioration of 0.8 percentage points.
+- Meanwhile, the S&P 500 rose 60.88% over the same period (from 4,846 to 7,796 as of October 1, 2026).
+
+**Key periods show the disconnect:**
+- **2024 (steady deterioration):** Unemployment drifted up from 3.7% to 4.1%, while stocks climbed 21.4% (4,846 to 5,882).
+- **Early 2025 (worsening):** Unemployment spiked to 4.2%–4.5% during January–November 2025. The market fell 7.81% from January to April but then reversed sharply, rising 23% from April through December.
+- **2026 (moderation):** Unemployment has moderated to 4.2% by September, while stocks surged 12.33% year-to-date through October.
+
+**What this suggests:** The stock market's strong 2026 performance has coincided with improving or stable unemployment, but the market's 2025 recovery despite rising unemployment points to other drivers—likely shifts in inflation expectations, Fed policy, or earnings growth (not verified by my data)—being more powerful than the labor market deterioration alone. Correlation over this period isn't causation; each data move has multiple explanations.
+
+Tool calls: get_economic_series({"series_id": "UNRATE", "start_date": "2024-01-01", "end_date": "2026-10-07"}), get_stock_data({"ticker": "^GSPC", "start_date": "2024-01-01", "end_date": "2026-10-07", "interval": "1mo"})
+[answered; 2 iterations; 19309 in / 992 out tokens; 11.6s]
+
+==============================================================================
+
+Q: Has anything unusual happened in CPI over the past year?
+
+A: Yes, **2 of 10 observations were unusual** over the past year.
+
+**March 2026** saw an unusually large monthly CPI spike: the index jumped **up 0.87%** from the previous month, with a z-score of 3.21 and a percentile of 96.6. This was well above the typical monthly increase of 0.25%, suggesting a significant one-month surge in prices.
+
+**June 2026** showed the opposite: an unusual monthly **decline of 0.42%** (z = -3.49, percentile 74.8), which was sharper than typical and suggests a rare monthly pullback in prices.
+
+Since then, the pace has normalized. August 2026 (the latest observation, released September 11) showed a 0.4% monthly increase—still elevated but no longer statistically unusual.
+
+**Caveat:** These results include the Covid period (March–December 2020) in the baseline, when prices moved far outside their usual range, which may affect what counts as "unusual" by today's standards.
+
+Tool calls: detect_anomalies({"series_id": "CPIAUCSL", "start_date": "2025-10-01", "end_date": "2026-10-07"})
+[answered; 2 iterations; 13134 in / 353 out tokens; 5.6s]
+
+==============================================================================
+
+Q: What is going on with unemployment lately?
+
+A: Unemployment has stabilized after a sharp spike in late 2025, settling at **4.2% in September 2026** (released October 2, 2026).
+
+The labor market deteriorated sharply through 2025—unemployment climbed from 3.7% in January 2024 to a peak of 4.5% in November 2025, the highest in nearly four years. However, it has since moderated steadily over the past ten months, falling 0.3 percentage points from that peak and holding around 4.2% through September. This suggests the labor market has stabilized after the shock of late 2025, though employment remains softer than the tight conditions of early 2024.
+
+The next employment report will be released on November 6, 2026.
+
+Tool calls: none
+[answered; 1 iterations; 6499 in / 177 out tokens; 2.5s]

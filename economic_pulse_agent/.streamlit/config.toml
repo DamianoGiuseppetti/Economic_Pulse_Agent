@@ -1,0 +1,8 @@
+# The app spends the owner's API credit, so it listens on this machine only. Streamlit's default is every
+# network interface (it prints a "Network URL"); change this only if you mean to expose it.
+[server]
+address = "localhost"
+headless = true
+
+[browser]
+gatherUsageStats = false

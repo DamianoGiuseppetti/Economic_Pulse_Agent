@@ -1,0 +1,10 @@
+pydantic>=2.0
+yfinance>=0.2.40
+requests>=2.31
+python-dotenv>=1.0
+pytest>=8.0
+anthropic>=1.8
+langchain-core>=1.6
+langchain-classic>=1.0
+langchain-anthropic>=1.6
+streamlit>=1.40
